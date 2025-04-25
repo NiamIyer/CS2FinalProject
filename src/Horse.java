@@ -8,7 +8,9 @@ public class Horse {
     private int rate;
     private double odds;
     private int bettingOdds;
-    public Horse(GameView window, int x, int y, String name) {
+    private int state;
+    private int horseNumber;
+    public Horse(GameView window, int x, int y, String name, int number) {
         this.x = x;
         this.y = y;
         this.window = window;
@@ -16,6 +18,8 @@ public class Horse {
         rate = (int) (Math.random() * 10 + 5);
         odds = 0;
         bettingOdds = 0;
+        state = 0;
+        horseNumber = number;
     }
     public String getName() {
         return name;
@@ -38,6 +42,7 @@ public class Horse {
 
     public void setBettingOdds(int bettingOdds) {
         this.bettingOdds = bettingOdds;
+        System.out.println("+" + bettingOdds);
     }
 
     public int getY() {
@@ -60,7 +65,7 @@ public class Horse {
         if (odds < 0.2) {
             rate += (int) (Math.random() * 6) - 3;
         }
-        if (odds < 0.4) {
+        else if (odds < 0.4) {
             rate += (int) (Math.random() * 8) - 4;
         }
         else {
@@ -70,10 +75,20 @@ public class Horse {
             rate = 1;
         }
     }
-
-    public void draw(Graphics g) {
-
+    public void changeState() {
+        if (state == 1) {
+            state = 0;
+        }
+        else {
+            state = 1;
+        }
     }
 
+    public void draw(Graphics g) {
+        g.drawImage(window.getHorsePicture(horseNumber),x,y,x+250,y+125,0,0,500,250,window);
+    }
 
+    public void drawChoose(Graphics g,int x,int y) {
+        g.drawImage(window.getHorsePicture(horseNumber),x,y,x+125,y+250,0,0,500,250,window);
+    }
 }
