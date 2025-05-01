@@ -1,4 +1,8 @@
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class Horse {
     private int x;
@@ -10,17 +14,39 @@ public class Horse {
     private int bettingOdds;
     private int state;
     private int horseNumber;
+    private int wins;
     public Horse(GameView window, int x, int y, String name, int number) {
         this.x = x;
         this.y = y;
         this.window = window;
         this.name = name;
-        rate = (int) (Math.random() * 10 + 5);
+        rate = (int) (Math.random() * 15 + 5);
         odds = 0;
         bettingOdds = 0;
         state = 0;
         horseNumber = number;
+        findWins();
     }
+
+
+    public void findWins() {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("horsestats.csv"));
+            String line;
+            line = reader.readLine();
+            while (line != null) {
+                if (line.substring(0,line.indexOf(',')).equals(name)) {
+                    wins = Integer.valueOf(line.substring(line.indexOf(',') + 1));
+                    System.out.println(wins);
+                    return;
+                }
+                line = reader.readLine();
+            }
+        } catch ( IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public String getName() {
         return name;
     }
@@ -36,13 +62,21 @@ public class Horse {
         return rate;
     }
 
-    public int getBettingOdds() {
-        return bettingOdds;
+    public String getBettingOdds() {
+        if (odds > 0.5) {
+            return Double.toString(bettingOdds);
+        }
+        else {
+            return "+" + bettingOdds;
+        }
+    }
+
+    public int getHorseNumber() {
+        return horseNumber;
     }
 
     public void setBettingOdds(int bettingOdds) {
         this.bettingOdds = bettingOdds;
-        System.out.println("+" + bettingOdds);
     }
 
     public int getY() {
