@@ -1,15 +1,19 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferStrategy;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.*;
-import java.lang.Thread;
-
-
+// Inheritance
 public class GameView extends JFrame {
     private final int WINDOW_HEIGHT = 500;
     private final int WINDOW_WIDTH = 1000;
+    private final int LEFT_HORSE_X = 20;
+    private final int RIGHT_HORSE_X = 744;
+    private final int TOP_HORSE_Y = 20;
+    private final int LOW_HORSE_Y = 315;
+    // Different states
     public static final int START = 0;
     public static final int CHOOSE_HORSE = 1;
     public static final int ENTER_NAME = 2;
@@ -25,20 +29,25 @@ public class GameView extends JFrame {
     private JTextField getName;
     private JTextField getWager;
 
-    public GameView(Game game) {
+    public GameView(Game game)
+    {
         this.game = game;
-        try {
+        // Creates new font from google fonts
+        try
+        {
             sansNiam = Font.createFont(Font.TRUETYPE_FONT, new File("Resources/PixelifySans.ttf"));
             sansNiam = sansNiam.deriveFont(Font.PLAIN, 24);
-        } catch (FontFormatException | IOException e) {
+        } catch (FontFormatException | IOException e)
+        {
             throw new RuntimeException(e);
         }
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setTitle("Horse Game");
-        this.setSize(WINDOW_WIDTH,WINDOW_HEIGHT);
+        this.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         horses = new Horse[4];
         horse = new Image[4];
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++)
+        {
             horse[i] = new ImageIcon("Resources/Horse " + (i + 1) + ".png").getImage();
         }
         background = new Image[6];
@@ -49,15 +58,18 @@ public class GameView extends JFrame {
         background[4] = new ImageIcon("Resources/Winner.png").getImage();
         background[5] = new ImageIcon("Resources/HighScore.png").getImage();
         initializeJTextField();
-
+        setVisible(true);
+        createBufferStrategy(2);
     }
 
-    public void setState (int state) {
+    public void setState(int state)
+    {
         this.state = state;
         repaint();
     }
-
-    public void initializeJTextField() {
+    // Sets the text fields for input
+    public void initializeJTextField()
+    {
         setLayout(new FlowLayout());
         getName = new JTextField(50);
         getName.setText("Enter your name: ");
@@ -76,65 +88,71 @@ public class GameView extends JFrame {
         getWager.setFont(sansNiam);
         getWager.setVisible(false);
         add(getWager);
+        // Checks if the user hits enter, then sets the name and shows wager textfield
         getName.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+            @Override public void actionPerformed(ActionEvent e)
+            {
                 String name = getName.getText().substring(getName.getText().indexOf(":") + 2);
                 game.setPlayerName(name);
                 getName.setVisible(false);
                 getWager.setVisible(true);
             }
         });
+        // Checks if the user enters valid input and sets the player's wager
         getWager.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+            @Override public void actionPerformed(ActionEvent e)
+            {
                 String wager = getWager.getText().substring(getWager.getText().indexOf(":") + 2);
                 double bet;
-                try {
+                try
+                {
                     bet = Double.parseDouble(wager);
-                    System.out.println(bet);
-
-                } catch (NumberFormatException error) {
+                    // If there is an error, makes sure it is a number
+                } catch (NumberFormatException error)
+                {
                     getWager.setText("Please enter a number: ");
                     return;
                 }
-                if (bet > game.getPlayer().getBalance()) {
-                    getWager.setText("Please enter a wager less than $" + game.getPlayer().getBalance() + ": ");
+                // Loops through and checks if there are any problems
+                if (bet > game.getPlayer().getBalance())
+                {
+                    getWager.setText("Please enter a wager less than $" +
+                            game.getPlayer().getBalance() + ": ");
                     return;
                 }
-                if (bet < 0) {
+                if (bet < 0)
+                {
                     getWager.setText("Please enter a positive number: ");
                     return;
                 }
+
                 game.getPlayer().setWager(bet);
-                System.out.println(game.getPlayer().getWager());
                 getWager.setVisible(false);
                 setState(RACE);
                 game.getTimer().start();
-
             }
-
         });
     }
 
-    public String getGetName() {
-        return getName();
-    }
-
-    public void setHorses() {
-        // Sets die because it is originally null
-        for (int i = 0; i < 4; i++) {
+    public void setHorses()
+    {
+        // Sets horse because it is originally null
+        for (int i = 0; i < 4; i++)
+        {
             this.horses[i] = game.getHorses(i);
         }
         this.setVisible(true);
     }
 
-    public Image getHorsePicture(int num) {
+    public Image getHorsePicture(int num)
+    {
         return horse[num];
     }
 
-    public void paint(Graphics g) {
-        switch (state) {
+    public void myPaint(Graphics g)
+    {
+        switch (state)
+        {
             case START:
                 drawStart(g);
                 break;
@@ -151,66 +169,120 @@ public class GameView extends JFrame {
                 drawEnd(g);
                 break;
             case HIGH_SCORE:
-                //drawScore(g);
+                drawScore(g);
         }
     }
 
-    @Override
-    public int getState() {
+    @Override public int getState()
+    {
         return state;
     }
 
-    public void drawStart(Graphics g) {
-        g.drawImage(background[START],0,0,this);
+    public void drawStart(Graphics g)
+    {
+        // Draws the background and sets the 'buttons'
+        g.drawImage(background[START], 0, 0, this);
         g.setFont(sansNiam);
-        g.drawString("PLAY",250,350);
-        g.drawString("HIGH SCORES",650,350);
+        g.drawString("PLAY", 250, 350);
+        g.drawString("HIGH SCORES", 650, 350);
     }
 
-    public void drawChoose(Graphics g) {
-        g.drawImage(background[CHOOSE_HORSE],0,0,this);
+    public void drawChoose(Graphics g)
+    {
+        // Draws the horses in corners of the choose screen
+        g.drawImage(background[CHOOSE_HORSE], 0, 0, this);
         g.setFont(sansNiam);
-        g.drawImage(horse[0],20,20,220,120,0,0,500,250,this);
-        g.drawString(horses[0].getName(),20,150);
-        g.drawString(horses[0].getBettingOdds(),20,175);
-        g.drawImage(horse[1],744,20,944,120,0,0,500,250,this);
-        g.drawString(horses[1].getName(),744,150);
-        g.drawString(horses[1].getBettingOdds(),744,175);
-        g.drawImage(horse[2],20,315,220,415,0,0,500,250,this);
-        g.drawString(horses[2].getName(),20,445);
-        g.drawString(horses[2].getBettingOdds(),20,470);
-        g.drawImage(horse[3],744,315,944,415,0,0,500,250,this);
-        g.drawString(horses[3].getName(),744,445);
-        g.drawString(horses[3].getBettingOdds(),744,470);
+        g.drawImage(horse[0], LEFT_HORSE_X, TOP_HORSE_Y, 220, 120, 0, 0, 2 * (Horse.HORSE_WIDTH), 2 * (Horse.HORSE_HEIGHT), this);
+        g.drawString(horses[0].getName(), LEFT_HORSE_X, 150);
+        g.drawString(horses[0].getBettingOdds(), LEFT_HORSE_X, 175);
+        g.drawImage(horse[1], RIGHT_HORSE_X, TOP_HORSE_Y, 944, 120, 0, 0, 2 * (Horse.HORSE_WIDTH), 2 * (Horse.HORSE_HEIGHT), this);
+        g.drawString(horses[1].getName(), RIGHT_HORSE_X, 150);
+        g.drawString(horses[1].getBettingOdds(), RIGHT_HORSE_X, 175);
+        g.drawImage(horse[2], LEFT_HORSE_X, LOW_HORSE_Y, 220, 415, 0, 0, 2 * (Horse.HORSE_WIDTH), 2 * (Horse.HORSE_HEIGHT), this);
+        g.drawString(horses[2].getName(), LEFT_HORSE_X, 445);
+        g.drawString(horses[2].getBettingOdds(), LEFT_HORSE_X, 470);
+        g.drawImage(horse[3], RIGHT_HORSE_X, LOW_HORSE_Y, 944, 415, 0, 0, 2 * (Horse.HORSE_WIDTH), 2 * (Horse.HORSE_HEIGHT), this);
+        g.drawString(horses[3].getName(), RIGHT_HORSE_X, 445);
+        g.drawString(horses[3].getBettingOdds(), RIGHT_HORSE_X, 470);
     }
 
-    public void drawEnter(Graphics g) {
-        g.drawImage(background[ENTER_NAME],0,0,this);
+    public void drawEnter(Graphics g)
+    {
+        g.drawImage(background[ENTER_NAME], 0, 0, this);
         getName.setVisible(true);
-        getWager.setVisible(true);
-
+        getWager.setVisible(false);
     }
 
-    public void drawRace(Graphics g) {
-        g.drawImage(background[RACE],0,0,this);
-        for (Horse horse : horses) {
+    public void drawRace(Graphics g)
+    {
+        // Draws the horses positions in the race state
+        g.drawImage(background[RACE], 0, 0, this);
+        for (Horse horse : horses)
+        {
             horse.draw(g);
         }
     }
 
-    public void drawEnd(Graphics g) {
-        g.setFont(new Font("serif",Font.ITALIC + Font.BOLD + Font.CENTER_BASELINE,80));
-        g.drawImage(background[WINNER],0,0,this);
-        g.drawString(game.getWinner().getName() + " Won!",200,200);
-        g.drawImage(horse[game.getWinner().getHorseNumber()],300,250,740,450,0,0,500,250,this);
+    public void drawEnd(Graphics g)
+    {
+        // Draws who wins
+        g.setFont(new Font("serif", Font.ITALIC + Font.BOLD + Font.CENTER_BASELINE, 80));
+        g.drawImage(background[WINNER], 0, 0, this);
+        g.drawString(game.getWinner().getName() + " Won!", 200, 200);
+        g.drawImage(horse[game.getWinner().getHorseNumber()], 300, 250, 740, 450, 0, 0, 2 * (Horse.HORSE_WIDTH), 2 * (Horse.HORSE_HEIGHT),
+                this);
     }
 
-    public void drawScore(Graphics g) {
+    public void drawScore(Graphics g)
+    {
+        // Draws the highscore of both the horses and players
         g.setFont(sansNiam);
-        g.drawImage(background[HIGH_SCORE],0,0,this);
-        g.drawString("",0,0);
+        g.drawImage(background[HIGH_SCORE], 0, 0, this);
+        g.drawString("", 0, 0);
+        for (int i = 0; i < 5; i++)
+        {
+            g.drawString(game.getHorseWinnerNames().get(i) + ": " +
+                            game.getHorseWinnerCount().get(i),
+                    100, 200 + 50 * i);
+        }
 
+        for (int i = 0; i < game.getPlayerWinnerNames().size(); i++)
+        {
+            if (i > 4)
+            {
+                break;
+            }
+            g.drawString(game.getPlayerWinnerNames().get(i) + ": " +
+                            game.getPlayerWinnerBalances().get(i),
+                    760, 200 + 50 * i);
+        }
+    }
+
+    public void paint(Graphics g)
+    {
+        // Uses double buffering from Front-end Back-end
+        BufferStrategy bf = this.getBufferStrategy();
+        if (bf == null)
+            return;
+
+        Graphics g2 = null;
+
+        try
+        {
+            g2 = bf.getDrawGraphics();
+            // myPaint does the actual drawing, as described in ManyBallsView
+            myPaint(g2);
+        } finally
+        {
+            // It is best to dispose() a Graphics object when done with it.
+            g2.dispose();
+        }
+
+        // Shows the contents of the backbuffer on the screen.
+        bf.show();
+
+        // Tell the System to do the Drawing now, otherwise it can take a few extra ms until
+        // Drawing is done which looks very jerky
+        Toolkit.getDefaultToolkit().sync();
     }
 }
-
-
