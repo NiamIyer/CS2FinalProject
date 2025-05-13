@@ -63,9 +63,13 @@ public class Game implements ActionListener, MouseListener {
             horses[i] = new Horse(window, 0, (i * 110) + 25, findHorseName(), i);
         }
         // Calculates the odds of each horse winning based off their rates
-        calculateOdds();
         window.setHorses();
         window.addMouseListener(this);
+        start();
+    }
+
+    public void start() {
+        calculateOdds();
         findTopFivePlayers();
         findTopFiveHorses();
     }
@@ -304,6 +308,7 @@ public class Game implements ActionListener, MouseListener {
         {
             throw new RuntimeException(e);
         }
+        // Traversing ArrayLists
         for (int i = 0; i < names.size(); i++)
         {
             try

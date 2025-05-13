@@ -270,7 +270,7 @@ public class GameView extends JFrame {
         try
         {
             g2 = bf.getDrawGraphics();
-            // myPaint does the actual drawing, as described in ManyBallsView
+            // myPaint does the actual drawing
             myPaint(g2);
         } finally
         {
